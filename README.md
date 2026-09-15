@@ -1,0 +1,1 @@
+# smarttrip-ai-travel-planner
