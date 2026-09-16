@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LoginPage() {
+function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const nextPath = searchParams.get("next");
+  const safeNextPath = nextPath?.startsWith("/") && !nextPath.startsWith("//")
+    ? nextPath
+    : "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -37,7 +42,7 @@ export default function LoginPage() {
     setMessage("Login successful.");
 
     router.refresh();
-    router.push("/");
+    router.push(safeNextPath);
   }
 
   return (
@@ -128,9 +133,9 @@ export default function LoginPage() {
 
             <div className="mt-8 border-t border-slate-100 pt-6 text-center">
               <p className="text-sm text-slate-500">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
-                  href="/auth/signup"
+                  href={safeNextPath === "/" ? "/auth/signup" : `/auth/signup?next=${encodeURIComponent(safeNextPath)}`}
                   className="font-semibold text-slate-950 hover:underline"
                 >
                   Create one
@@ -141,5 +146,13 @@ export default function LoginPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function LoginRoute() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-50" />}>
+      <LoginPage />
+    </Suspense>
   );
 }

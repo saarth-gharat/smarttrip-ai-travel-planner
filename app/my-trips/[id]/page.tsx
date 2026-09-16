@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   Bot,
@@ -93,6 +94,7 @@ export default function TripDetailsPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  const router = useRouter();
   const [tripId, setTripId] = useState<string | null>(null);
   const [trip, setTrip] = useState<Trip | null>(null);
   const [items, setItems] = useState<ItineraryItem[]>([]);
@@ -115,7 +117,7 @@ export default function TripDetailsPage({
         } = await supabase.auth.getUser();
 
         if (!user) {
-          window.location.href = "/auth/login";
+          router.replace("/auth/login");
           return;
         }
 
@@ -154,7 +156,11 @@ export default function TripDetailsPage({
           return;
         }
 
-        setTrip(tripData as Trip);
+        const destinations = Array.isArray(tripData.destinations)
+          ? tripData.destinations[0] ?? null
+          : tripData.destinations;
+
+        setTrip({ ...tripData, destinations } as Trip);
 
         const { data: itineraryData, error: itineraryError } =
           await supabase
@@ -208,7 +214,7 @@ export default function TripDetailsPage({
     }
 
     loadTrip();
-  }, [params]);
+  }, [params, router]);
 
   /*
    * AI-generated trips don't have calendar dates yet because

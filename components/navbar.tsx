@@ -2,12 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
-export default function Navbar() {
+export default function Navbar({
+  variant = "overlay",
+}: {
+  variant?: "overlay" | "solid";
+}) {
+  const router = useRouter();
   const supabase = createClient();
+  const isSolid = variant === "solid";
 
   const [user, setUser] = useState<User | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -40,17 +47,25 @@ export default function Navbar() {
     setUser(null);
     setMobileOpen(false);
 
-    window.location.href = "/";
+    router.push("/");
   }
 
   return (
-    <header className="absolute left-0 right-0 top-0 z-50">
+    <header
+      className={
+        isSolid
+          ? "sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur"
+          : "absolute left-0 right-0 top-0 z-50"
+      }
+    >
       <div className="mx-auto max-w-7xl px-5 py-5 lg:px-8">
         <nav className="flex items-center justify-between">
           {/* Logo */}
           <Link
             href="/"
-            className="text-2xl font-bold tracking-tight text-white"
+            className={`text-2xl font-bold tracking-tight ${
+              isSolid ? "text-slate-950" : "text-white"
+            }`}
           >
             Travelora
           </Link>
@@ -59,14 +74,22 @@ export default function Navbar() {
           <div className="hidden items-center gap-8 md:flex">
             <Link
               href="/"
-              className="text-sm font-medium text-white/80 transition hover:text-white"
+              className={`text-sm font-medium transition ${
+                isSolid
+                  ? "text-slate-600 hover:text-slate-950"
+                  : "text-white/80 hover:text-white"
+              }`}
             >
               Home
             </Link>
 
             <Link
               href="/explore"
-              className="text-sm font-medium text-white/80 transition hover:text-white"
+              className={`text-sm font-medium transition ${
+                isSolid
+                  ? "text-slate-600 hover:text-slate-950"
+                  : "text-white/80 hover:text-white"
+              }`}
             >
               Explore
             </Link>
@@ -74,16 +97,35 @@ export default function Navbar() {
             {user ? (
               <>
                 <Link
-                  href="/planner"
-                  className="text-sm font-medium text-white/80 transition hover:text-white"
+                  href="/my-trips"
+                  className={`text-sm font-medium transition ${
+                    isSolid
+                      ? "text-slate-600 hover:text-slate-950"
+                      : "text-white/80 hover:text-white"
+                  }`}
                 >
                   My Trips
+                </Link>
+
+                <Link
+                  href="/planner"
+                  className={`text-sm font-medium transition ${
+                    isSolid
+                      ? "text-slate-600 hover:text-slate-950"
+                      : "text-white/80 hover:text-white"
+                  }`}
+                >
+                  Plan a trip
                 </Link>
 
                 <button
                   type="button"
                   onClick={handleLogout}
-                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+                    isSolid
+                      ? "bg-slate-950 text-white hover:bg-slate-800"
+                      : "bg-white text-slate-950 hover:bg-white/90"
+                  }`}
                 >
                   Log out
                 </button>
@@ -92,14 +134,22 @@ export default function Navbar() {
               <>
                 <Link
                   href="/auth/login"
-                  className="text-sm font-medium text-white/80 transition hover:text-white"
+                  className={`text-sm font-medium transition ${
+                    isSolid
+                      ? "text-slate-600 hover:text-slate-950"
+                      : "text-white/80 hover:text-white"
+                  }`}
                 >
                   Log in
                 </Link>
 
                 <Link
                   href="/auth/signup"
-                  className="rounded-full bg-white px-5 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-white/90"
+                  className={`rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+                    isSolid
+                      ? "bg-slate-950 text-white hover:bg-slate-800"
+                      : "bg-white text-slate-950 hover:bg-white/90"
+                  }`}
                 >
                   Get started
                 </Link>
@@ -111,7 +161,11 @@ export default function Navbar() {
           <button
             type="button"
             onClick={() => setMobileOpen((value) => !value)}
-            className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white backdrop-blur md:hidden"
+            className={`flex h-10 w-10 items-center justify-center rounded-full backdrop-blur md:hidden ${
+              isSolid
+                ? "bg-slate-100 text-slate-950"
+                : "bg-white/10 text-white"
+            }`}
             aria-label="Toggle menu"
           >
             {mobileOpen ? <X size={20} /> : <Menu size={20} />}
@@ -141,11 +195,19 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link
-                    href="/planner"
+                    href="/my-trips"
                     onClick={() => setMobileOpen(false)}
                     className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
                   >
                     My Trips
+                  </Link>
+
+                  <Link
+                    href="/planner"
+                    onClick={() => setMobileOpen(false)}
+                    className="rounded-2xl px-4 py-3 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    Plan a trip
                   </Link>
 
                   <button

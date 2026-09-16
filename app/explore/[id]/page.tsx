@@ -1,6 +1,7 @@
 import Link from "next/link";
-import { ArrowLeft, Heart, MapPin, Star } from "lucide-react";
+import { ArrowLeft, MapPin, Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import SaveDestinationButton from "@/components/save-destination-button";
 
 type DestinationPageProps = {
   params: Promise<{
@@ -34,7 +35,7 @@ export default async function DestinationPage({
           </h1>
 
           <p className="mt-3 text-slate-500">
-            We couldn't find the destination you're looking for.
+            We couldn&apos;t find the destination you&apos;re looking for.
           </p>
 
           <Link
@@ -95,13 +96,7 @@ export default async function DestinationPage({
               </h1>
             </div>
 
-            <button
-              type="button"
-              className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-slate-950 shadow-lg transition hover:scale-105"
-              aria-label="Save destination"
-            >
-              <Heart size={20} />
-            </button>
+            <SaveDestinationButton destinationId={destination.id} />
           </div>
         </div>
       </section>

@@ -54,7 +54,10 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-500">
+        <div
+          suppressHydrationWarning
+          className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-500"
+        >
           © {new Date().getFullYear()} Travelora. Built for better journeys.
         </div>
       </div>

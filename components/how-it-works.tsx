@@ -1,3 +1,5 @@
+"use client";
+
 import { CalendarDays, Sparkles, WalletCards } from "lucide-react";
 
 const steps = [

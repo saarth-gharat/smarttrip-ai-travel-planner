@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowRight,
@@ -13,6 +13,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import Navbar from "@/components/navbar";
 
 type Destination = {
   id: string;
@@ -33,7 +34,7 @@ const interests = [
   "Photography",
 ];
 
-export default function PlannerPage() {
+function PlannerPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -69,11 +70,35 @@ export default function PlannerPage() {
       }
 
       setDestinations(data || []);
+
+      const queryName = searchParams.get("q")?.trim().toLowerCase();
+      const destinationFromUrl = searchParams.get("destination");
+
+      if (!destinationFromUrl && queryName) {
+        const match = (data || []).find(
+          (destination) =>
+            destination.name.toLowerCase().includes(queryName) ||
+            destination.country.toLowerCase().includes(queryName)
+        );
+
+        if (match) {
+          setDestinationId(match.id);
+        }
+      }
+
+      const style = searchParams.get("style");
+
+      if (style && interests.includes(style)) {
+        setSelectedInterests((current) =>
+          current.includes(style) ? current : [...current, style]
+        );
+      }
+
       setLoadingDestinations(false);
     }
 
     loadDestinations();
-  }, []);
+  }, [searchParams]);
 
   function toggleInterest(interest: string) {
     setSelectedInterests((current) =>
@@ -121,6 +146,27 @@ export default function PlannerPage() {
       return;
     }
 
+    const selectedDestination = destinations.find(
+      (destination) => destination.id === destinationId
+    );
+
+    /*
+     * Keep validated preferences in the browser so someone who needs to log
+     * in can resume their plan immediately after authentication.
+     */
+    sessionStorage.setItem(
+      "travelora_ai_request",
+      JSON.stringify({
+        destination_id: destinationId,
+        destination_name: selectedDestination?.name || "",
+        country: selectedDestination?.country || "",
+        days: dayCount,
+        people: personCount,
+        budget: budgetAmount,
+        interests: selectedInterests,
+      })
+    );
+
     setLoading(true);
 
     try {
@@ -131,31 +177,9 @@ export default function PlannerPage() {
       } = await supabase.auth.getUser();
 
       if (!user) {
-        router.push("/auth/login");
+        router.push("/auth/login?next=/planner/recommendation");
         return;
       }
-
-      /*
-       * For now we store the user's preferences in sessionStorage.
-       * In the next step, the AI will use these exact values
-       * to generate the recommendation.
-       */
-      const selectedDestination = destinations.find(
-        (destination) => destination.id === destinationId
-      );
-
-      sessionStorage.setItem(
-        "travelora_ai_request",
-        JSON.stringify({
-          destination_id: destinationId,
-          destination_name: selectedDestination?.name || "",
-          country: selectedDestination?.country || "",
-          days: dayCount,
-          people: personCount,
-          budget: budgetAmount,
-          interests: selectedInterests,
-        })
-      );
 
       router.push("/planner/recommendation");
     } catch (submitError) {
@@ -173,6 +197,8 @@ export default function PlannerPage() {
 
   return (
     <main className="min-h-screen bg-slate-50">
+      <Navbar variant="solid" />
+
       <section className="relative overflow-hidden bg-slate-950">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(59,130,246,0.22),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(168,85,247,0.18),transparent_35%)]" />
 
@@ -409,5 +435,13 @@ export default function PlannerPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+export default function PlannerRoute() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-50" />}>
+      <PlannerPage />
+    </Suspense>
   );
 }

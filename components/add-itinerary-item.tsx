@@ -327,7 +327,7 @@ export default function AddItineraryItem({
         {error && (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm leading-6 text-red-700">
             <strong>
-              Couldn't add activity.
+              Couldn&apos;t add activity.
             </strong>
 
             <br />

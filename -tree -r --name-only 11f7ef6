@@ -1,0 +1,34 @@
+[33mcommit 11f7ef6749dcaa97c0a888f1bf67d822e9845cda[m
+Author: Saarth Gharat <saarthgharat10@gmail.com>
+Date:   Tue Sep 15 23:23:31 2026 +0530
+
+    Travelora working AI planner checkpoint
+
+ app/api/ai/itinerary/route.ts       | 247 [32m+++++++++++[m
+ app/api/ai/recommend/route.ts       | 267 [32m++++++++++++[m
+ app/auth/login/page.tsx             | 145 [32m+++++++[m
+ app/auth/signup/page.tsx            | 186 [32m+++++++++[m
+ app/explore/[id]/page.tsx           | 228 [32m++++++++++[m
+ app/explore/page.tsx                | 102 [32m+++++[m
+ app/globals.css                     |  24 [32m+[m[31m-[m
+ app/my-trips/[id]/page.tsx          | 807 [32m++++++++++++++++++++++++++++++++++++[m
+ app/my-trips/page.tsx               | 280 [32m+++++++++++++[m
+ app/page.tsx                        | 155 [32m++++[m[31m---[m
+ app/planner/itinerary/page.tsx      | 694 [32m+++++++++++++++++++++++++++++++[m
+ app/planner/page.tsx                | 413 [32m++++++++++++++++++[m
+ app/planner/recommendation/page.tsx | 678 [32m++++++++++++++++++++++++++++++[m
+ components/add-itinerary-item.tsx   | 368 [32m++++++++++++++++[m
+ components/destination-card.tsx     |  62 [32m+++[m
+ components/destination-search.tsx   |  52 [32m+++[m
+ components/edit-itinerary-item.tsx  | 343 [32m+++++++++++++++[m
+ components/footer.tsx               |  63 [32m+++[m
+ components/hero.tsx                 | 119 [32m++++++[m
+ components/how-it-works.tsx         |  79 [32m++++[m
+ components/itinerary-list.tsx       | 329 [32m+++++++++++++++[m
+ components/navbar.tsx               | 184 [32m++++++++[m
+ components/section-heading.tsx      |  47 [32m+++[m
+ lib/supabase/client.ts              |   8 [32m+[m
+ lib/supabase/server.ts              |  27 [32m++[m
+ package-lock.json                   | 625 [32m+++++++++++++++++++++++++++[m[31m-[m
+ package.json                        |   7 [32m+[m
+ 27 files changed, 6459 insertions(+), 80 deletions(-)

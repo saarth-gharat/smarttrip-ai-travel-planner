@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -76,28 +76,7 @@ export default function AIItineraryPage() {
   const [error, setError] = useState("");
   const [saveError, setSaveError] = useState("");
 
-  useEffect(() => {
-    const storedSelection = sessionStorage.getItem(
-      "travelora_ai_selection"
-    );
-
-    if (!storedSelection) {
-      router.replace("/planner");
-      return;
-    }
-
-    try {
-      const parsed = JSON.parse(storedSelection) as AISelection;
-
-      setSelection(parsed);
-      generateItinerary(parsed);
-    } catch {
-      setError("We couldn't read your selected trip.");
-      setLoading(false);
-    }
-  }, [router]);
-
-  async function generateItinerary(trip: AISelection) {
+  const generateItinerary = useCallback(async (trip: AISelection) => {
     try {
       setLoading(true);
       setError("");
@@ -143,7 +122,39 @@ export default function AIItineraryPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadItinerary() {
+      const storedSelection = sessionStorage.getItem(
+        "travelora_ai_selection"
+      );
+
+      if (!storedSelection) {
+        router.replace("/planner");
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(storedSelection) as AISelection;
+        if (!active) return;
+        setSelection(parsed);
+        await generateItinerary(parsed);
+      } catch {
+        if (!active) return;
+        setError("We couldn't read your selected trip.");
+        setLoading(false);
+      }
+    }
+
+    void loadItinerary();
+
+    return () => {
+      active = false;
+    };
+  }, [generateItinerary, router]);
 
   async function saveTrip() {
     if (!selection || !itinerary) {

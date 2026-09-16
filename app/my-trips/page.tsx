@@ -8,24 +8,23 @@ import {
   Wallet,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import Navbar from "@/components/navbar";
+
+type Destination = {
+  name: string;
+  country: string;
+  image_url: string | null;
+};
 
 type Trip = {
   id: string;
   name: string;
-  destination_id: string | null;
   start_date: string | null;
   end_date: string | null;
   travelers: number;
   budget: number;
   interests: string[];
-  created_at: string;
-  destinations:
-    | {
-        name: string;
-        country: string;
-        image_url: string | null;
-      }
-    | null;
+  destinations: Destination | null;
 };
 
 function formatDate(date: string | null) {
@@ -53,28 +52,32 @@ export default async function MyTripsPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5">
-        <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
-          <h1 className="text-2xl font-bold text-slate-950">
-            Sign in to view your trips
-          </h1>
+      <main className="min-h-screen bg-slate-50">
+        <Navbar variant="solid" />
 
-          <p className="mt-3 text-sm leading-6 text-slate-500">
-            Your saved trips will appear here after you sign in.
-          </p>
+        <div className="flex min-h-[70vh] items-center justify-center px-5">
+          <div className="w-full max-w-md rounded-3xl bg-white p-8 text-center shadow-sm ring-1 ring-slate-200">
+            <h1 className="text-2xl font-bold text-slate-950">
+              Sign in to view your trips
+            </h1>
 
-          <Link
-            href="/auth/login"
-            className="mt-6 inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-          >
-            Log in
-          </Link>
+            <p className="mt-3 text-sm leading-6 text-slate-500">
+              Your saved trips will appear here after you sign in.
+            </p>
+
+            <Link
+              href="/auth/login"
+              className="mt-6 inline-flex items-center justify-center rounded-full bg-slate-950 px-6 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Log in
+            </Link>
+          </div>
         </div>
       </main>
     );
   }
 
-  const { data: trips, error } = await supabase
+  const { data: tripRows, error } = await supabase
     .from("trips")
     .select(`
       id,
@@ -95,12 +98,21 @@ export default async function MyTripsPage() {
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
+  const trips: Trip[] = (tripRows ?? []).map(({ destinations, ...trip }) => ({
+    ...trip,
+    destinations: Array.isArray(destinations)
+      ? (destinations[0] as Destination | undefined) ?? null
+      : (destinations as Destination | null),
+  }));
+
   if (error) {
     console.error("Failed to load trips:", error);
   }
 
   return (
     <main className="min-h-screen bg-slate-50">
+      <Navbar variant="solid" />
+
       <section className="border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
           <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-end">
@@ -132,7 +144,7 @@ export default async function MyTripsPage() {
 
       <section className="py-12">
         <div className="mx-auto max-w-7xl px-5 lg:px-8">
-          {trips && trips.length > 0 ? (
+          {trips.length > 0 ? (
             <>
               <div className="mb-7 flex items-center justify-between">
                 <div>

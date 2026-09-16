@@ -1,13 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FormEvent, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function SignupPage() {
+function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const supabase = createClient();
+  const nextPath = searchParams.get("next");
+  const safeNextPath = nextPath?.startsWith("/") && !nextPath.startsWith("//")
+    ? nextPath
+    : "/";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -49,7 +54,7 @@ export default function SignupPage() {
 
     if (data.session) {
       router.refresh();
-      router.push("/");
+      router.push(safeNextPath);
       return;
     }
 
@@ -171,7 +176,7 @@ export default function SignupPage() {
               <p className="text-sm text-slate-500">
                 Already have an account?{" "}
                 <Link
-                  href="/auth/login"
+                  href={safeNextPath === "/" ? "/auth/login" : `/auth/login?next=${encodeURIComponent(safeNextPath)}`}
                   className="font-semibold text-slate-950 hover:underline"
                 >
                   Log in
@@ -182,5 +187,13 @@ export default function SignupPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SignupRoute() {
+  return (
+    <Suspense fallback={<main className="min-h-screen bg-slate-50" />}>
+      <SignupPage />
+    </Suspense>
   );
 }

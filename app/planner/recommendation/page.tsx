@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
@@ -80,26 +80,7 @@ export default function RecommendationPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    const storedRequest = sessionStorage.getItem("travelora_ai_request");
-
-    if (!storedRequest) {
-      router.replace("/planner");
-      return;
-    }
-
-    try {
-      const parsedRequest = JSON.parse(storedRequest) as AIRequest;
-      setRequest(parsedRequest);
-
-      generateRecommendation(parsedRequest);
-    } catch {
-      setError("We couldn't read your trip details.");
-      setLoading(false);
-    }
-  }, [router]);
-
-  async function generateRecommendation(tripRequest: AIRequest) {
+  const generateRecommendation = useCallback(async (tripRequest: AIRequest) => {
     try {
       setLoading(true);
       setError("");
@@ -157,7 +138,37 @@ export default function RecommendationPage() {
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadRecommendation() {
+      const storedRequest = sessionStorage.getItem("travelora_ai_request");
+
+      if (!storedRequest) {
+        router.replace("/planner");
+        return;
+      }
+
+      try {
+        const parsedRequest = JSON.parse(storedRequest) as AIRequest;
+        if (!active) return;
+        setRequest(parsedRequest);
+        await generateRecommendation(parsedRequest);
+      } catch {
+        if (!active) return;
+        setError("We couldn't read your trip details.");
+        setLoading(false);
+      }
+    }
+
+    void loadRecommendation();
+
+    return () => {
+      active = false;
+    };
+  }, [generateRecommendation, router]);
 
   function continueToItinerary() {
     if (!request || !recommendation) return;

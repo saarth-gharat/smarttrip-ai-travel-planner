@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Hero from "@/components/hero";
 import Navbar from "@/components/navbar";
 import DestinationCard from "@/components/destination-card";
@@ -82,9 +83,12 @@ export default async function Home() {
                 interests.
               </p>
 
-              <button className="mt-8 rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-100">
+              <Link
+                href="/planner"
+                className="mt-8 inline-flex rounded-full bg-white px-6 py-3.5 text-sm font-semibold text-slate-950 transition hover:bg-slate-100"
+              >
                 Start planning
-              </button>
+              </Link>
             </div>
           </div>
         </div>
